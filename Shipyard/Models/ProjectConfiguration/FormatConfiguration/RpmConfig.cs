@@ -23,28 +23,52 @@ public record RpmConfig : FormatConfigurationBase
     public int? Release { get; set; }
 
     /// <summary>
-    ///   The dependencies which this package provides.
+    ///   Optionally, the dependencies which this package provides.
     /// </summary>
     [JsonPropertyName("provides")]
     public List<string>? Provides { get; set; }
 
     /// <summary>
-    ///   The dependencies which this package requires.
+    ///   Optionally, the dependencies which this package requires.
     /// </summary>
     [JsonPropertyName("dependsOn")]
     public List<string>? DependsOn { get; set; }
 
     /// <summary>
-    ///   A flag indicating whether to install a systemd service unit.
+    ///   Optionally, a flag indicating whether to install a systemd service unit.
     /// </summary>
     [JsonPropertyName("installSystemdService")]
     public bool? InstallSystemdService { get; set; }
 
     /// <summary>
-    ///   The name of the systemd service.
+    ///   Optionally, the name of the systemd service.
     /// </summary>
     [JsonPropertyName("systemdServiceName")]
     public string? SystemdServiceName { get; set; }
+
+    /// <summary>
+    ///   Optionally, a script to run before installation.
+    /// </summary>
+    [JsonPropertyName("preInstallScript")]
+    public string? PreInstallScript { get; set; }
+
+    /// <summary>
+    ///   Optionally, a script to run after installation.
+    /// </summary>
+    [JsonPropertyName("postInstallScript")]
+    public string? PostInstallScript { get; set; }
+
+    /// <summary>
+    ///   Optionally, a script to run before uninstallation.
+    /// </summary>
+    [JsonPropertyName("preUninstallScript")]
+    public string? PreUninstallScript { get; set; }
+
+    /// <summary>
+    ///   Optionally, a script to run after uninstallation.
+    /// </summary>
+    [JsonPropertyName("postUninstallScript")]
+    public string? PostUninstallScript { get; set; }
 
     // Quick validation to get rid of nullability warnings elsewhere
     // Should NOT be used for full validation of config correctness

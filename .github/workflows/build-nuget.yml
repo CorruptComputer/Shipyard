@@ -1,4 +1,4 @@
-name: Build .NET tool
+name: Release .NET tool
 
 on:
   push:

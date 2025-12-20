@@ -19,7 +19,8 @@
         "dotnet-runtime-10.0"
       ],
       "installSystemdService": true,
-      "systemdServiceName": "Shipyard.Demo.service"
+      "systemdServiceName": "Shipyard.Demo.service",
+      "postInstallScript": "Shipyard.Demo"
     }
   ]
 }

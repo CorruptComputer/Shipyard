@@ -63,7 +63,11 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
             provides = config.Provides,
             //post_install_script = "TODO: Figure out what the hell goes here",
             description = "TODO: Add description",
-            systemd_service_name = config.InstallSystemdService == true ? config.SystemdServiceName : null
+            systemd_service_name = config.InstallSystemdService == true ? config.SystemdServiceName : null,
+            pre_install_script = config.PreInstallScript,
+            post_install_script = config.PostInstallScript,
+            pre_uninstall_script = config.PreUninstallScript,
+            post_uninstall_script = config.PostUninstallScript
         };
 
         string templatePath = Path.Combine(

@@ -104,7 +104,7 @@
         },
         "packageName": {
           "type": "string",
-          "description": "Name of the package"
+          "description": "The name of the package."
         },
         "release": {
           "type": "integer",
@@ -113,7 +113,7 @@
         },
         "provides": {
           "type": "array",
-          "description": "The dependencies which this package provides.",
+          "description": "Optionally, the dependencies which this package provides.",
           "items": {
             "type": "string"
           },
@@ -123,7 +123,7 @@
         },
         "dependsOn": {
           "type": "array",
-          "description": "The dependencies which this package requires.",
+          "description": "Optionally, the dependencies which this package requires.",
           "items": {
             "type": "string"
           },
@@ -134,11 +134,27 @@
         },
         "installSystemdService": {
           "type": "boolean",
-          "description": "Whether to install a systemd service unit"
+          "description": "Optionally, a flag indicating whether to install a systemd service unit."
         },
         "systemdServiceName": {
           "type": "string",
-          "description": "Name of the systemd service"
+          "description": "Optionally, the name of the systemd service."
+        },
+        "preInstallScript": {
+          "type": "string",
+          "description": "Optionally, a script to run before installation."
+        },
+        "postInstallScript": {
+          "type": "string",
+          "description": "Optionally, a script to run after installation."
+        },
+        "preUninstallScript": {
+          "type": "string",
+          "description": "Optionally, a script to run before uninstallation."
+        },
+        "postUninstallScript": {
+          "type": "string",
+          "description": "Optionally, a script to run after uninstallation."
         }
       }
     }
