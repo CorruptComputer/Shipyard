@@ -24,6 +24,9 @@
     <SourceControlInformationFeatureSupported>true</SourceControlInformationFeatureSupported>
     <SourceRevisionId>develop</SourceRevisionId>
     <NoDefaultLaunchSettingsFile>True</NoDefaultLaunchSettingsFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <InstallService Condition="$(Configuration) == 'Release'">true</InstallService>
   </PropertyGroup>
@@ -31,13 +34,10 @@
   <ItemGroup>
     <PackageReference Include="Scriban" Version="6.5.2" />
     <PackageReference Include="System.CommandLine" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Update="Templates/**/*.scriban">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
