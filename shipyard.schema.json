@@ -93,8 +93,7 @@
       "required": [
         "format",
         "packageName",
-        "release",
-        "prefix"
+        "release"
       ],
       "additionalProperties": false,
       "properties": {
@@ -111,15 +110,6 @@
           "type": "integer",
           "description": "Release number (incremented for rebuilds of the same version)",
           "minimum": 1
-        },
-        "prefix": {
-          "type": "string",
-          "description": "Installation prefix directory",
-          "examples": [
-            "/opt/myapp",
-            "/usr/local",
-            "/usr"
-          ]
         },
         "provides": {
           "type": "array",

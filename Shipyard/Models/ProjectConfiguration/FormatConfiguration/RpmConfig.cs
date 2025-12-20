@@ -23,12 +23,6 @@ public record RpmConfig : FormatConfigurationBase
     public int? Release { get; set; }
 
     /// <summary>
-    ///   The installation prefix directory.
-    /// </summary>
-    [JsonPropertyName("prefix")]
-    public string? Prefix { get; set; }
-
-    /// <summary>
     ///   The dependencies which this package provides.
     /// </summary>
     [JsonPropertyName("provides")]
@@ -56,11 +50,9 @@ public record RpmConfig : FormatConfigurationBase
     // Should NOT be used for full validation of config correctness
     [MemberNotNullWhen(true, nameof(PackageName))]
     [MemberNotNullWhen(true, nameof(Release))]
-    [MemberNotNullWhen(true, nameof(Prefix))]
     internal bool HasNonNullRequiredValues
         => !string.IsNullOrWhiteSpace(PackageName)
-            && Release.HasValue
-            && !string.IsNullOrWhiteSpace(Prefix);
+            && Release.HasValue;
 
     internal override bool Validate(TextWriter errorWriter)
     {

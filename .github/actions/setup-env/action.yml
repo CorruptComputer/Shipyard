@@ -13,6 +13,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get install -y rpm
+        dotnet tool install --global shipyard
 
     - name: Print .NET version and SDKs
       shell: bash

@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/CorruptComputer/Shipyard/refs/heads/develop/shipyard.schema.json",
-  "projectFile": "./Shipyard.Demo.csproj",
+  "projectFile": "./Shipyard.csproj",
   "framework": "net10.0",
   "runtimes": [
     "linux-x64"
@@ -12,14 +12,14 @@
   "formatConfigs": [
     {
       "format": "rpm",
-      "packageName": "Shipyard.Demo",
+      "packageName": "Shipyard",
       "release": 1,
       "provides": [],
       "dependsOn": [
-        "dotnet-runtime-10.0"
-      ],
-      "installSystemdService": true,
-      "systemdServiceName": "Shipyard.Demo.service"
+        "dotnet-runtime-10.0",
+        "dotnet-sdk-10.0",
+        "rpm-build"
+      ]
     }
   ]
 }
