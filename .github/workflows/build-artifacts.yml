@@ -1,4 +1,4 @@
-name: .NET Build
+name: Build Artifacts
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Packages
         run: |
-          shipyard --config ./shipyard.json --output ./publish/
+          shipyard --config ./Shipyard/shipyard.json --output ./publish/
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v6
