@@ -26,4 +26,4 @@ jobs:
         run: dotnet build --configuration Debug --no-incremental
 
       - name: Test
-        run: dotnet run ./Shipyard/Shipyard.csproj -- --config ./Shipyard.Demo/shipyard.json --output ./publish
+        run: dotnet run --project ./Shipyard/Shipyard.csproj -- --config ./Shipyard.Demo/shipyard.json --output ./publish
