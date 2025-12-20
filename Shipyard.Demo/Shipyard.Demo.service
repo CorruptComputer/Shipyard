@@ -1,0 +1,9 @@
+[Unit]
+Description=Shipyard.Demo Service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/Shipyard.Demo
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shipyard Project Configuration",
+  "description": "Schema for Shipyard project configuration files",
+  "type": "object",
+  "required": [
+    "projectFile",
+    "framework",
+    "runtimes",
+    "version",
+    "author",
+    "license",
+    "repositoryUrl",
+    "formatConfigs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "The schema version"
+    },
+    "projectFile": {
+      "type": "string",
+      "description": "Path to the .NET project file (.csproj, .fsproj, or .vbproj). If relative, interpreted relative to the configuration file location."
+    },
+    "framework": {
+      "type": "string",
+      "description": "The version of .NET to target (e.g., 'net9.0', 'net10.0'). See: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks",
+      "examples": [
+        "net9.0",
+        "net10.0"
+      ]
+    },
+    "runtimes": {
+      "type": "array",
+      "description": "The runtime identifiers (RIDs) for the target platforms. See: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "linux",
+          "linux-x64",
+          "linux-musl-x64",
+          "linux-musl-arm64",
+          "linux-arm",
+          "linux-arm64",
+          "linux-bionic-arm64",
+          "linux-loongarch64"
+        ]
+      }
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the project",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "author": {
+      "type": "string",
+      "description": "The developer or author of the project"
+    },
+    "license": {
+      "type": "string",
+      "description": "The license of the project (SPDX format recommended)",
+      "examples": [
+        "MIT",
+        "Apache-2.0",
+        "GPL-3.0"
+      ]
+    },
+    "repositoryUrl": {
+      "type": "string",
+      "description": "The repository URL for the project source",
+      "format": "uri"
+    },
+    "formatConfigs": {
+      "type": "array",
+      "description": "Format-specific configurations",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/rpmConfig"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "rpmConfig": {
+      "type": "object",
+      "title": "RPM Configuration",
+      "description": "Configuration specific to RPM (RedHat/CentOS/Fedora) package format",
+      "required": [
+        "format",
+        "packageName",
+        "release",
+        "prefix"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "rpm",
+          "description": "Format type identifier"
+        },
+        "packageName": {
+          "type": "string",
+          "description": "Name of the package"
+        },
+        "release": {
+          "type": "integer",
+          "description": "Release number (incremented for rebuilds of the same version)",
+          "minimum": 1
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Installation prefix directory",
+          "examples": [
+            "/opt/myapp",
+            "/usr/local",
+            "/usr"
+          ]
+        },
+        "provides": {
+          "type": "array",
+          "description": "The dependencies which this package provides.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            "foo"
+          ]
+        },
+        "dependsOn": {
+          "type": "array",
+          "description": "The dependencies which this package requires.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            "dotnet-runtime-10.0",
+            "foo"
+          ]
+        },
+        "installSystemdService": {
+          "type": "boolean",
+          "description": "Whether to install a systemd service unit"
+        },
+        "systemdServiceName": {
+          "type": "string",
+          "description": "Name of the systemd service"
+        }
+      }
+    }
+  }
+}

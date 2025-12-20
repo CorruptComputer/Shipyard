@@ -1,0 +1,12 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+*.user
+.idea/
+*opencover.xml
+coverage.xml
+TestResults/
+/publish/
+codeql-pack.lock.yml

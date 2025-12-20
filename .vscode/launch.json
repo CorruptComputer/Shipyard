@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "coreclr",
+            "name": "Debug - Shipyard.Demo",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Shipyard/bin/Debug/net10.0/shipyard",
+            "args": ["--config", "${workspaceFolder}/Shipyard.Demo/shipyard.json", "--output", "${workspaceFolder}/publish"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
