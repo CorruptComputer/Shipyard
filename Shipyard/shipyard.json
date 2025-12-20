@@ -5,7 +5,7 @@
   "runtimes": [
     "linux-x64"
   ],
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Nickolas Gupton",
   "license": "MIT",
   "repositoryUrl": "https://github.com/CorruptComputer/Shipyard",
