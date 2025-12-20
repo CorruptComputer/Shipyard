@@ -51,26 +51,17 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
             throw new DirectoryNotFoundException($"Published directory not found for runtime {buildTemplate.Runtime}");
         }
 
-        RpmBuildDirectories rpmDirs = CreateRpmBuildDirectoryStructure(OutputDir, buildTemplate.Runtime.ToJsonValue(), config.PackageName, ProjectConfig.Version);
+        DirectoryInfo buildRoot = CreateRpmBuildRoot(OutputDir, buildTemplate.Runtime.ToJsonValue());
 
         // Copy the publish files to BUILDROOT
         bool copied = CopyPublishedFilesToBuildRoot(
             new DirectoryInfo(Path.Combine(OutputDir.ToString(), $"publish-{buildTemplate.Runtime}")),
-            rpmDirs.BuildRootDir,
+            buildRoot,
             config.PackageName);
 
         if (!copied)
         {
             throw new IOException("Failed to copy published files to RPM build root.");
-        }
-
-        // Create the symlink
-        bool symlinkCreated = CreateSymbolicLink(
-            config.PackageName,
-            rpmDirs.BuildRootDir);
-        if (!symlinkCreated)
-        {
-            throw new IOException("Failed to create symbolic link in RPM build root.");
         }
 
         // If enabled, copy the systemd service file from the
@@ -80,7 +71,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
         {
             bool systemdCopied = CopySystemdServiceFileToBuildRoot(
                 SourceDir,
-                rpmDirs.BuildRootDir,
+                buildRoot,
                 config.SystemdServiceName!);
 
             if (!systemdCopied)
@@ -91,8 +82,8 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
 
         RpmBuildWrapper rpmBuilder = new(ConsoleWriter, ErrorWriter);
         string? builtRpmPath = await rpmBuilder.BuildRpmAsync(
-            buildTemplate.OutputFile.FullName,
-            rpmDirs.RpmbuildRoot.FullName);
+            buildTemplate.OutputFile,
+            buildRoot);
 
         if (string.IsNullOrWhiteSpace(builtRpmPath))
         {
@@ -102,26 +93,19 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
         return builtRpmPath;
     }
 
-    private sealed record RpmBuildDirectories(
-        DirectoryInfo RpmbuildRoot,
-        DirectoryInfo BuildDir,
-        DirectoryInfo BuildRootDir);
-
-    private static RpmBuildDirectories CreateRpmBuildDirectoryStructure(DirectoryInfo outputDir, string runtime, string packageName, string version)
+    private static DirectoryInfo CreateRpmBuildRoot(DirectoryInfo outputDir, string runtime)
     {
         // Set up rpmbuild directory structure
         DirectoryInfo rpmbuildRoot = outputDir.CreateSubdirectory(Path.Combine("rpmbuild", runtime));
-        DirectoryInfo buildDir = rpmbuildRoot.CreateSubdirectory("BUILD");
-        DirectoryInfo buildRootDir = buildDir.CreateSubdirectory(Path.Combine($"{packageName}-{version}-build", "BUILDROOT"));
 
-        return new RpmBuildDirectories(rpmbuildRoot, buildDir, buildRootDir);
+        return rpmbuildRoot;
     }
 
     private bool CopyPublishedFilesToBuildRoot(DirectoryInfo publishedDir, DirectoryInfo buildRootDir, string packageName)
     {
         try
         {
-            DirectoryInfo targetDir = buildRootDir.CreateSubdirectory(Path.Combine("usr", "share", packageName));
+            DirectoryInfo targetDir = buildRootDir.CreateSubdirectory("SOURCE");
 
             foreach (string dirPath in Directory.GetDirectories(publishedDir.FullName, "*", SearchOption.AllDirectories))
             {
@@ -130,7 +114,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
 
             foreach (string newPath in Directory.GetFiles(publishedDir.FullName, "*.*", SearchOption.AllDirectories))
             {
-                File.Copy(newPath, newPath.Replace(publishedDir.FullName, targetDir.FullName), true);
+                File.Copy(newPath, newPath.Replace(publishedDir.FullName, targetDir.FullName));
             }
 
             return true;
@@ -142,28 +126,11 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
         }
     }
 
-    private bool CreateSymbolicLink(string packageName, DirectoryInfo buildRootDir)
-    {
-        try
-        {
-            DirectoryInfo symlinkDir = buildRootDir.CreateSubdirectory(Path.Combine("usr", "local", "bin"));
-            string symlinkPath = Path.Combine(symlinkDir.FullName, packageName);
-            File.CreateSymbolicLink(symlinkPath, Path.Combine("../../share", packageName, packageName));
-            return true;
-        }
-        catch (Exception ex)
-        {
-            ErrorWriter.WriteLine($"Error creating symbolic link: {ex.Message}");
-            return false;
-        }
-    }
-
     private bool CopySystemdServiceFileToBuildRoot(DirectoryInfo sourcePath, DirectoryInfo buildRootDir, string systemdServiceName)
     {
         try
         {
-            DirectoryInfo serviceDir = buildRootDir.CreateSubdirectory(Path.Combine("etc", "systemd", "system"));
-            File.Copy(Path.Combine(sourcePath.FullName, systemdServiceName), Path.Combine(serviceDir.FullName, systemdServiceName));
+            File.Copy(Path.Combine(sourcePath.FullName, systemdServiceName), Path.Combine(buildRootDir.FullName, systemdServiceName));
 
             return true;
         }

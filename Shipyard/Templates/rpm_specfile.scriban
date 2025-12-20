@@ -68,7 +68,22 @@ Provides: {{ prov }}
 # noop
 
 %install
-# noop
+%{__mkdir_p} %{buildroot}/usr/local/bin # Symlink to the binary will go here
+%{__mkdir_p} %{buildroot}/usr/share/{{ package_name }} # Published files will go here
+{{ if systemd_service_name }}
+%{__mkdir_p} %{buildroot}/etc/systemd/system # Systemd service file will go here
+{{ end }}
+
+# Install all published files to /usr/share/{{ package_name }}/
+cp -r %{_topdir}/SOURCE/* %{buildroot}/usr/share/{{ package_name }}/
+
+# Create symlink in /usr/local/bin/{{ package_name }} pointing to the actual binary
+ln -s ../../share/{{ package_name }}/{{ package_name }} %{buildroot}/usr/local/bin/{{ package_name }}
+
+{{ if systemd_service_name }}
+# Install the systemd service file
+%{__install} -m0644 %{_topdir}/{{ systemd_service_name }} %{buildroot}/etc/systemd/system/{{ systemd_service_name }}
+{{ end }}
 
 %clean
 # noop

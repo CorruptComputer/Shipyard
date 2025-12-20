@@ -11,16 +11,16 @@ public class RpmBuildWrapper(TextWriter consoleWriter, TextWriter errorWriter)
     ///   Builds an RPM package using rpmbuild.
     /// </summary>
     /// <param name="specFile">Path to the .spec file</param>
-    /// <param name="buildTopDir">Top-level directory for rpmbuild (usually BUILDROOT or similar)</param>
+    /// <param name="buildRoot">Top-level directory for rpmbuild (usually BUILDROOT or similar)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Path to the built RPM file if successful; null otherwise</returns>
     /// <exception cref="InvalidOperationException">Thrown when the rpmbuild process fails to start</exception>
     public async Task<string?> BuildRpmAsync(
-        string specFile,
-        string buildTopDir,
+        FileInfo specFile,
+        DirectoryInfo buildRoot,
         CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(specFile))
+        if (!specFile.Exists)
         {
             await errorWriter.WriteLineAsync($"Spec file not found: {specFile}");
             return null;
@@ -29,10 +29,10 @@ public class RpmBuildWrapper(TextWriter consoleWriter, TextWriter errorWriter)
         List<string> args =
         [
             "-bb",
-            "--define", $"_topdir {buildTopDir}",
+            "--define", $"_topdir {buildRoot.FullName}",
             "--noclean",
             "--noprep",
-            specFile
+            specFile.FullName
         ];
 
         ProcessStartInfo psi = new()
