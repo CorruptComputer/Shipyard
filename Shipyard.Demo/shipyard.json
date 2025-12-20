@@ -20,7 +20,7 @@
       ],
       "installSystemdService": true,
       "systemdServiceName": "Shipyard.Demo.service",
-      "postInstallScript": "Shipyard.Demo"
+      "postInstallScript": "/usr/local/bin/Shipyard.Demo"
     }
   ]
 }
