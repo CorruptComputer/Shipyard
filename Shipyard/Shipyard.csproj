@@ -15,7 +15,7 @@
     <ToolCommandName>shipyard</ToolCommandName>
 
     <!-- Assembly info -->
-    <VersionPrefix>0.0.2</VersionPrefix>
+    <VersionPrefix>0.0.3</VersionPrefix>
     <VersionSuffix>$(SourceRevisionId)</VersionSuffix>
     <Authors>Nickolas Gupton</Authors>
     <RepositoryUrl>https://github.com/CorruptComputer/Shipyard</RepositoryUrl>

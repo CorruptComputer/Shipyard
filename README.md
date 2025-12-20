@@ -1,4 +1,4 @@
-# Shipyard
+# Shipyard [![Build & Tests](https://github.com/CorruptComputer/Shipyard/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/CorruptComputer/Shipyard/actions/workflows/build.yml) [![NuGet Version](https://img.shields.io/nuget/vpre/shipyard.svg)](https://www.nuget.org/packages/shipyard)
 
 Project to build and package .NET applications on Linux.
 
