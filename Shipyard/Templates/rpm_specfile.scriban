@@ -96,7 +96,9 @@ Provides: {{ prov }}
 %files
 /usr/local/bin/{{ package_name }}
 /usr/share/{{ package_name }}/
-/etc/systemd/system/{{ package_name }}.service
+{{ if systemd_service_name }}
+/etc/systemd/system/{{ systemd_service_name }}
+{{ end }}
 
 {{# Include all files from the build #}}
 /*

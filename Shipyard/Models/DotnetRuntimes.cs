@@ -90,11 +90,13 @@ internal static class DotnetRuntimesExtensions
             DotnetRuntimes.noarch => "noarch",
             DotnetRuntimes.x64 => "x86_64",
             DotnetRuntimes.musl_x64 => "x86_64",
-            DotnetRuntimes.musl_arm64 => "aarch64",
-            DotnetRuntimes.arm => "armhfp",
-            DotnetRuntimes.arm64 => "aarch64",
-            DotnetRuntimes.bionic_arm64 => "aarch64",
-            DotnetRuntimes.loongarch64 => "loongarch64",
+            DotnetRuntimes.musl_arm64 => "arm64",
+            // I don't think Fedora supports 32 bit anything anymore
+            //DotnetRuntimes.arm => "arm32",
+            DotnetRuntimes.arm64 => "arm64",
+            DotnetRuntimes.bionic_arm64 => "arm64",
+            // No clue what this would even be
+            //DotnetRuntimes.loongarch64 => "loongarch64",
             _ => throw new NotSupportedException($"Unsupported DotnetRuntimes value: {runtime}")
         };
     }

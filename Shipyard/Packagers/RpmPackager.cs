@@ -73,17 +73,6 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
             throw new IOException("Failed to create symbolic link in RPM build root.");
         }
 
-
-        // Copy the source files from the .csproj directory to SOURCES, the csproj directory should be resolved relative to the config file
-        bool sourceCopied = CopySourceFilesToSourceDir(
-            SourceDir,
-            rpmDirs.SourcesDir);
-
-        if (!sourceCopied)
-        {
-            throw new IOException("Failed to copy source files to RPM SOURCES directory.");
-        }
-
         // If enabled, copy the systemd service file from the
         if (config.InstallSystemdService.HasValue
             && config.InstallSystemdService.Value
@@ -100,22 +89,12 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
             }
         }
 
-        // Copy the specfile from buildTemplate.OutputFile to its location in SPECS
-        bool specCopied = CopySpecFileToSpecsDir(
-            buildTemplate.OutputFile,
-            rpmDirs.SpecsDir);
-
-        if (!specCopied)
-        {
-            throw new IOException("Failed to copy spec file to RPM SPECS directory.");
-        }
-
         RpmBuildWrapper rpmBuilder = new(ConsoleWriter, ErrorWriter);
         string? builtRpmPath = await rpmBuilder.BuildRpmAsync(
             buildTemplate.OutputFile.FullName,
             rpmDirs.RpmbuildRoot.FullName);
 
-        if (builtRpmPath is null)
+        if (string.IsNullOrWhiteSpace(builtRpmPath))
         {
             throw new InvalidOperationException("RPM build failed.");
         }
@@ -126,10 +105,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
     private sealed record RpmBuildDirectories(
         DirectoryInfo RpmbuildRoot,
         DirectoryInfo BuildDir,
-        DirectoryInfo BuildRootDir,
-        DirectoryInfo SpecsDir,
-        DirectoryInfo RpmsDir,
-        DirectoryInfo SourcesDir);
+        DirectoryInfo BuildRootDir);
 
     private static RpmBuildDirectories CreateRpmBuildDirectoryStructure(DirectoryInfo outputDir, string runtime, string packageName, string version)
     {
@@ -138,22 +114,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
         DirectoryInfo buildDir = rpmbuildRoot.CreateSubdirectory("BUILD");
         DirectoryInfo buildRootDir = buildDir.CreateSubdirectory(Path.Combine($"{packageName}-{version}-build", "BUILDROOT"));
 
-        // Copy specfile here
-        DirectoryInfo specsDir = rpmbuildRoot.CreateSubdirectory("SPECS");
-
-        // The RPM will be created in here after rpmbuild is run
-        DirectoryInfo rpmsDir = rpmbuildRoot.CreateSubdirectory("RPMS");
-
-        // Put the source code here (not strictly necessary, but a nice to have)
-        DirectoryInfo sourcesDir = rpmbuildRoot.CreateSubdirectory("SOURCES");
-
-        return new RpmBuildDirectories(
-            rpmbuildRoot,
-            buildDir,
-            buildRootDir,
-            specsDir,
-            rpmsDir,
-            sourcesDir);
+        return new RpmBuildDirectories(rpmbuildRoot, buildDir, buildRootDir);
     }
 
     private bool CopyPublishedFilesToBuildRoot(DirectoryInfo publishedDir, DirectoryInfo buildRootDir, string packageName)
@@ -185,12 +146,9 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
     {
         try
         {
-            string symlinkTarget = Path.Combine("../../share", packageName, packageName);
             DirectoryInfo symlinkDir = buildRootDir.CreateSubdirectory(Path.Combine("usr", "local", "bin"));
             string symlinkPath = Path.Combine(symlinkDir.FullName, packageName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(symlinkPath)!);
-            File.CreateSymbolicLink(symlinkPath, symlinkTarget);
+            File.CreateSymbolicLink(symlinkPath, Path.Combine("../../share", packageName, packageName));
             return true;
         }
         catch (Exception ex)
@@ -200,74 +158,18 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
         }
     }
 
-    private bool CopySourceFilesToSourceDir(DirectoryInfo sourceFilesDir, DirectoryInfo sourceDir)
-    {
-        string[] excludeDirs =
-        [
-            Path.Combine(sourceDir.FullName, "bin"),
-            Path.Combine(sourceDir.FullName, "obj"),
-            Path.Combine(sourceDir.FullName, "publish"),
-        ];
-
-        try
-        {
-            foreach (string dirPath in Directory.GetDirectories(sourceFilesDir.FullName, "*", SearchOption.AllDirectories))
-            {
-                if (excludeDirs.Any(ed => dirPath.StartsWith(ed, StringComparison.OrdinalIgnoreCase)))
-                {
-                    continue;
-                }
-
-                Directory.CreateDirectory(dirPath.Replace(sourceFilesDir.FullName, sourceDir.FullName));
-            }
-
-            foreach (string newPath in Directory.GetFiles(sourceFilesDir.FullName, "*.*", SearchOption.AllDirectories))
-            {
-                if (excludeDirs.Any(ed => newPath.StartsWith(ed, StringComparison.OrdinalIgnoreCase)))
-                {
-                    continue;
-                }
-
-                File.Copy(newPath, newPath.Replace(sourceFilesDir.FullName, sourceDir.FullName), true);
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            ErrorWriter.WriteLine($"Error copying source files to SOURCES directory: {ex.Message}");
-            return false;
-        }
-    }
-
     private bool CopySystemdServiceFileToBuildRoot(DirectoryInfo sourcePath, DirectoryInfo buildRootDir, string systemdServiceName)
     {
         try
         {
-            string destPath = Path.Combine(buildRootDir.FullName, "etc", "systemd", "system", systemdServiceName);
-            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            DirectoryInfo serviceDir = buildRootDir.CreateSubdirectory(Path.Combine("etc", "systemd", "system"));
+            File.Copy(Path.Combine(sourcePath.FullName, systemdServiceName), Path.Combine(serviceDir.FullName, systemdServiceName));
 
-            File.Copy(Path.Combine(sourcePath.FullName, systemdServiceName), destPath, true);
             return true;
         }
         catch (Exception ex)
         {
             ErrorWriter.WriteLine($"Error copying systemd service file: {ex.Message}");
-            return false;
-        }
-    }
-
-    private bool CopySpecFileToSpecsDir(FileInfo specFile, DirectoryInfo specsDir)
-    {
-        try
-        {
-            string destPath = Path.Combine(specsDir.FullName, specFile.Name);
-            File.Copy(specFile.FullName, destPath, true);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            ErrorWriter.WriteLine($"Error copying spec file to SPECS directory: {ex.Message}");
             return false;
         }
     }

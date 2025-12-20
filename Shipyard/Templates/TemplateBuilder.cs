@@ -62,7 +62,8 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
             depends_on = config.DependsOn,
             provides = config.Provides,
             //post_install_script = "TODO: Figure out what the hell goes here",
-            description = "TODO: Add description"
+            description = "TODO: Add description",
+            systemd_service_name = config.InstallSystemdService == true ? config.SystemdServiceName : null
         };
 
         string templatePath = Path.Combine(
@@ -81,7 +82,7 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
             throw new InvalidOperationException($"Error parsing template: {string.Join(", ", template.Messages.Select(m => m.Message))}");
         }
         string result = await template.RenderAsync(templateModel);
-        string outputFilePath = Path.Combine(outputDir.FullName, $"{config.PackageName}.spec");
+        string outputFilePath = Path.Combine(outputDir.FullName, $"{config.PackageName}-{runtime.ToRpmArchString()}.spec");
 
         await File.WriteAllTextAsync(outputFilePath, result);
         return new TemplateResult(PackageFormat.rpm, runtime, new FileInfo(outputFilePath));
