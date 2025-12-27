@@ -2,39 +2,76 @@
 
 Project to build and package .NET applications on Linux.
 
-Current focus:
+Currently implemented:
 - RPM Packages
+- DEB Packages
 
 Future Goals:
-- DEB Packages
+- tarball
+- AppImage
 - Flatpaks
 - Snaps
-- AppImage
-- tarball
 
-## Architecture
-- Project build configuration should live in a single file, ideally one that can easily be checked into source control right along side the source code.
-  - Going with a JSON config for now, yaml might be nice to add support for later for folks that prefer it.
-  - Each project should only need 1 build configuration, even if they want to build for multiple platforms (x86_64, aarch64).
-  - Each package that is output should have its own package config, these package configs should only contain that package types specific configuration. (eg. if building both DEB and RPM packages for the same platform they shouldn't both need to specify the platform).
-- When possible, the Shipyard should use standard packaging tools and fit neatly into the ecosystem, without overstepping where it doesn't need to. (eg. Use rpmbuild to build RPM packages instead of reinventing the wheel).
-- The main application flow I forsee with this is:
-  1. User runs `shipyard --config path/to/shipyard.json --output path/to/output/dir`
-  2. Shipyard reads and deserializes the configuration file into ProjectConfig.
-  3. Shipyard validates the configuration.
-    - If invalid, it outputs errors and exits.
-    - This should include validating that required fields for the selected package formats are present.
-    - This should also include verifying that the target project exists and can be built with the specified settings.
-  4. Shipyard does a dotnet publish of the target project to the $"{output}/publish-{arch}{(selfContained ? string.Empty : "-sc")}" directory.
-    -- `dotnet publish ./Example/Example.csproj --output ./publish-x86_64 --configuration Release --framework net10.0 --runtime linux-x64 --no-self-contained --verbosity minimal` or similar
-  5. Shipyard uses the Packagers to create the packages for each of the package type configs in the ProjectConfig.
-    - This allows, for example, building both x86_64 and aarch64 RPMs and DEBs (4 packages total in this example) at the same time.
-  6. Shipyard outputs the generated packages to the the $"{output}" directory.
-    - Hopefully ending up with a filesystem that looks something like this with the example above:
-      - $"{output}/publish-x64"
-      - $"{output}/publish-arm64"
-      - $"{output}/Project-1.0.0-1.arm64.deb"
-      - $"{output}/Project-1.0.0-1.arm64.rpm"
-      - $"{output}/Project-1.0.0-1.x64.deb"
-      - $"{output}/Project-1.0.0-1.x64.rpm"
+## Installing
 
+Right now, the easiest way to install and run this tool is using `dotnet tool install --global shipyard`.
+You'll also need to install `rpmbuild` and `dpkg` from your systems package manager, depending on which package type you'd like to build.
+
+## Running
+
+You'll need to create a json configuration file, below is a sample based on Shipyards own configuration:
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/CorruptComputer/Shipyard/refs/heads/release/shipyard.schema.json",
+  "executable": "shipyard",
+  "version": "0.0.4",
+  "author": "Nickolas Gupton",
+  "license": "MIT",
+  "repositoryUrl": "https://github.com/CorruptComputer/Shipyard",
+  "dotnet": {
+    "projectFile": "./Shipyard.csproj",
+    "framework": "net10.0",
+    "configuration": "Release",
+    "runtimes": [
+      "linux-x64"
+    ],
+    "publish": []
+  },
+  "formats": [
+    {
+      "format": "rpm",
+      "packageName": "Shipyard",
+      "release": 1,
+      "provides": [],
+      "dependsOn": [
+        "dotnet-runtime-10.0",
+        "dotnet-sdk-10.0",
+        "rpm-build",
+        "dpkg"
+      ]
+    },
+    {
+      "format": "deb",
+      "packageName": "Shipyard",
+      "section": "utils",
+      "priority": "optional",
+      "maintainer": "Nickolas Gupton <email@example.com>",
+      "depends": [
+        "dotnet-runtime-10.0",
+        "dotnet-sdk-10.0",
+        "rpm",
+        "dpkg"
+      ]
+    }
+  ]
+}
+```
+
+Once this is created and shipyard is installed, you should be able to just run `shipyard --config path/to/shipyard.json --output path/to/output/dir`.
+
+## Contributing
+
+Since this is still very early in this project, I will probably not accept any contributions.
+Once things have stabilized and I'm able to achieve what I want from this, contributions will be more than welcome.
+
+##
