@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build & Test
+    name: Build Artifacts
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,4 +30,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: 'build.zip'
-          path: ./publish/*.{rpm,deb}
+          path: |
+            ./publish/*.rpm
+            ./publish/*.deb
