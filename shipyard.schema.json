@@ -4,9 +4,7 @@
   "description": "Schema for Shipyard project configuration files",
   "type": "object",
   "required": [
-    "projectFile",
-    "framework",
-    "runtimes",
+    "dotnet",
     "version",
     "author",
     "license",
@@ -19,35 +17,8 @@
       "type": "string",
       "description": "The schema version"
     },
-    "projectFile": {
-      "type": "string",
-      "description": "Path to the .NET project file (.csproj, .fsproj, or .vbproj). If relative, interpreted relative to the configuration file location."
-    },
-    "framework": {
-      "type": "string",
-      "description": "The version of .NET to target (e.g., 'net9.0', 'net10.0'). See: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks",
-      "examples": [
-        "net9.0",
-        "net10.0"
-      ]
-    },
-    "runtimes": {
-      "type": "array",
-      "description": "The runtime identifiers (RIDs) for the target platforms. See: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "enum": [
-          "linux",
-          "linux-x64",
-          "linux-musl-x64",
-          "linux-musl-arm64",
-          "linux-arm",
-          "linux-arm64",
-          "linux-bionic-arm64",
-          "linux-loongarch64"
-        ]
-      }
+    "dotnet": {
+      "$ref": "#/definitions/dotnetConfig"
     },
     "version": {
       "type": "string",
@@ -86,6 +57,65 @@
     }
   },
   "definitions": {
+    "dotnetConfig": {
+      "type": "object",
+      "title": "DotNet Configuration",
+      "description": "Configurations for .NET publishing in Shipyard",
+      "required": [
+        "projectFile",
+        "configuration",
+        "framework",
+        "runtimes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "projectFile": {
+          "type": "string",
+          "description": "The path to the .NET project file (.csproj, .fsproj, or .vbproj). If relative, interpreted relative to the configuration file location."
+        },
+        "configuration": {
+          "type": "string",
+          "description": "The build configuration (e.g., 'Release' or 'Debug')",
+          "enum": [
+            "Debug",
+            "Release"
+          ]
+        },
+        "framework": {
+          "type": "string",
+          "description": "The target framework (e.g., 'net8.0', 'net9.0'). See: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks",
+          "examples": [
+            "net9.0",
+            "net10.0"
+          ]
+        },
+        "publish": {
+          "type": "array",
+          "description": "The publish options",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runtimes": {
+          "type": "array",
+          "description": "The runtime identifiers (RIDs) for target platforms (e.g., 'linux-x64', 'linux-arm64'). See: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "linux",
+              "linux-x64",
+              "linux-musl-x64",
+              "linux-musl-arm64",
+              "linux-arm",
+              "linux-arm64",
+              "linux-bionic-arm64",
+              "linux-loongarch64"
+            ]
+          }
+        }
+      }
+    },
     "rpmConfig": {
       "type": "object",
       "title": "RPM Configuration",
@@ -104,16 +134,16 @@
         },
         "packageName": {
           "type": "string",
-          "description": "The name of the package."
+          "description": "The name of the package"
         },
         "release": {
           "type": "integer",
-          "description": "Release number (incremented for rebuilds of the same version)",
+          "description": "The release number (incremented for rebuilds of the same version)",
           "minimum": 1
         },
         "provides": {
           "type": "array",
-          "description": "Optionally, the dependencies which this package provides.",
+          "description": "Optionally, the dependencies which this package provides",
           "items": {
             "type": "string"
           },
@@ -123,7 +153,7 @@
         },
         "dependsOn": {
           "type": "array",
-          "description": "Optionally, the dependencies which this package requires.",
+          "description": "Optionally, the dependencies which this package requires",
           "items": {
             "type": "string"
           },
@@ -134,27 +164,27 @@
         },
         "installSystemdService": {
           "type": "boolean",
-          "description": "Optionally, a flag indicating whether to install a systemd service unit."
+          "description": "Optionally, a flag indicating whether to install a systemd service unit"
         },
         "systemdServiceName": {
           "type": "string",
-          "description": "Optionally, the name of the systemd service."
+          "description": "Optionally, the name of the systemd service"
         },
         "preInstallScript": {
           "type": "string",
-          "description": "Optionally, a script to run before installation."
+          "description": "Optionally, a script to run before installation"
         },
         "postInstallScript": {
           "type": "string",
-          "description": "Optionally, a script to run after installation."
+          "description": "Optionally, a script to run after installation"
         },
         "preUninstallScript": {
           "type": "string",
-          "description": "Optionally, a script to run before uninstallation."
+          "description": "Optionally, a script to run before uninstallation"
         },
         "postUninstallScript": {
           "type": "string",
-          "description": "Optionally, a script to run after uninstallation."
+          "description": "Optionally, a script to run after uninstallation"
         }
       }
     }

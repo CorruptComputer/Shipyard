@@ -1,17 +1,17 @@
 using Scriban;
 using Scriban.Parsing;
 using Shipyard.Models;
-using Shipyard.Models.ProjectConfiguration;
-using Shipyard.Models.ProjectConfiguration.FormatConfiguration;
+using Shipyard.Models.Configuration;
+using Shipyard.Models.Configuration.OutputFormats;
 
 namespace Shipyard.Templates;
 
 /// <summary>
 ///   The template builder.
 /// </summary>
-/// <param name="projectConfig"></param>
+/// <param name="config"></param>
 /// <param name="outputDir"></param>
-public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDir)
+public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
 {
     /// <summary>
     ///   Builds templates for all specified formats.
@@ -21,16 +21,16 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
     /// <exception cref="NotSupportedException"></exception>
     public async Task<List<TemplateResult>> BuildTemplatesAsync()
     {
-        if (!projectConfig.HasNonNullRequiredValues)
+        if (!config.HasNonNullRequiredValues || !config.Dotnet.HasNonNullRequiredValues)
         {
             throw new InvalidOperationException("Project configuration is missing required values.");
         }
 
         List<TemplateResult> results = [];
 
-        foreach (DotnetRuntimes runtime in projectConfig.Runtimes)
+        foreach (DotnetRuntimes runtime in config.Dotnet.Runtimes)
         {
-            foreach (FormatConfigurationBase config in projectConfig.FormatConfigs)
+            foreach (FormatConfigurationBase config in config.FormatConfigs)
             {
                 switch (config)
                 {
@@ -46,28 +46,33 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
         return results;
     }
 
-    private async Task<TemplateResult> BuildRpmTemplateAsync(DotnetRuntimes runtime, RpmConfig config)
+    private async Task<TemplateResult> BuildRpmTemplateAsync(DotnetRuntimes runtime, RpmConfig rpmConfig)
     {
+        if (!config.HasNonNullRequiredValues || !config.Dotnet.HasNonNullRequiredValues)
+        {
+            throw new InvalidOperationException("Project configuration is missing required values.");
+        }
+
         var templateModel = new
         {
-            package_name = config.PackageName,
-            version = projectConfig.Version,
-            release = config.Release,
+            package_name = rpmConfig.PackageName,
+            version = config.Version,
+            release = rpmConfig.Release,
             build_arch = runtime.ToRpmArchString(),
             summary = "TODO: Add summary",
-            license = projectConfig.License,
-            vendor = projectConfig.Author,
-            url = projectConfig.RepositoryUrl,
-            author = projectConfig.Author,
-            depends_on = config.DependsOn,
-            provides = config.Provides,
+            license = config.License,
+            vendor = config.Author,
+            url = config.RepositoryUrl,
+            author = config.Author,
+            depends_on = rpmConfig.DependsOn,
+            provides = rpmConfig.Provides,
             //post_install_script = "TODO: Figure out what the hell goes here",
             description = "TODO: Add description",
-            systemd_service_name = config.InstallSystemdService == true ? config.SystemdServiceName : null,
-            pre_install_script = config.PreInstallScript,
-            post_install_script = config.PostInstallScript,
-            pre_uninstall_script = config.PreUninstallScript,
-            post_uninstall_script = config.PostUninstallScript
+            systemd_service_name = rpmConfig.InstallSystemdService == true ? rpmConfig.SystemdServiceName : null,
+            pre_install_script = rpmConfig.PreInstallScript,
+            post_install_script = rpmConfig.PostInstallScript,
+            pre_uninstall_script = rpmConfig.PreUninstallScript,
+            post_uninstall_script = rpmConfig.PostUninstallScript
         };
 
         string templatePath = Path.Combine(
@@ -86,7 +91,7 @@ public class TemplateBuilder(ProjectConfig projectConfig, DirectoryInfo outputDi
             throw new InvalidOperationException($"Error parsing template: {string.Join(", ", template.Messages.Select(m => m.Message))}");
         }
         string result = await template.RenderAsync(templateModel);
-        string outputFilePath = Path.Combine(outputDir.FullName, $"{config.PackageName}-{runtime.ToRpmArchString()}.spec");
+        string outputFilePath = Path.Combine(outputDir.FullName, $"{rpmConfig.PackageName}-{runtime.ToRpmArchString()}.spec");
 
         await File.WriteAllTextAsync(outputFilePath, result);
         return new TemplateResult(PackageFormat.rpm, runtime, new FileInfo(outputFilePath));

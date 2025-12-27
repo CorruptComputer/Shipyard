@@ -1,10 +1,14 @@
 {
-  "$schema": "https://raw.githubusercontent.com/CorruptComputer/Shipyard/refs/heads/develop/shipyard.schema.json",
-  "projectFile": "./Shipyard.csproj",
-  "framework": "net10.0",
-  "runtimes": [
-    "linux-x64"
-  ],
+  "$schema": "../shipyard.schema.json",
+  "dotnet": {
+    "projectFile": "./Shipyard.csproj",
+    "framework": "net10.0",
+    "configuration": "Release",
+    "runtimes": [
+      "linux-x64"
+    ],
+    "publish": []
+  },
   "version": "0.0.4",
   "author": "Nickolas Gupton",
   "license": "MIT",

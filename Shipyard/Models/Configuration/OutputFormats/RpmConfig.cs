@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using FluentValidation;
 
-namespace Shipyard.Models.ProjectConfiguration.FormatConfiguration;
+namespace Shipyard.Models.Configuration.OutputFormats;
 
 /// <summary>
 ///   Configuration specific to RPM (RedHat/CentOS/Fedora) package format.<br />
@@ -78,16 +80,22 @@ public record RpmConfig : FormatConfigurationBase
         => !string.IsNullOrWhiteSpace(PackageName)
             && Release.HasValue;
 
-    internal override bool Validate(TextWriter errorWriter)
+    internal sealed class Validator : AbstractValidator<RpmConfig>
     {
-        bool isValid = true;
-
-        if (!HasNonNullRequiredValues)
+        public Validator()
         {
-            errorWriter.WriteLine("RPM configuration is missing required values.");
-            isValid = false;
-        }
+            RuleFor(config => config.PackageName)
+                .NotEmpty().WithMessage("'packageName' in 'rpm' configuration is required.");
 
-        return isValid;
+            RuleFor(config => config.Release)
+                .NotNull().WithMessage("'release' in 'rpm' configuration is required.")
+                .GreaterThan(0).WithMessage("'release' in 'rpm' configuration must be a positive integer.");
+
+            When(config => config.InstallSystemdService == true, () =>
+            {
+                RuleFor(config => config.SystemdServiceName)
+                    .NotEmpty().WithMessage("'systemdServiceName' in 'rpm' configuration is required when 'installSystemdService' is true.");
+            });
+        }
     }
 }

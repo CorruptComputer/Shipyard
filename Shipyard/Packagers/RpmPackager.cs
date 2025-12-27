@@ -1,6 +1,6 @@
 using Shipyard.Models;
-using Shipyard.Models.ProjectConfiguration;
-using Shipyard.Models.ProjectConfiguration.FormatConfiguration;
+using Shipyard.Models.Configuration;
+using Shipyard.Models.Configuration.OutputFormats;
 using Shipyard.Templates;
 using Shipyard.Wrappers;
 
@@ -11,12 +11,14 @@ namespace Shipyard.Packagers;
 /// </summary>
 /// <param name="sourceDir"></param>
 /// <param name="outputDir"></param>
+/// <param name="workingDir"></param>
 /// <param name="projectConfig"></param>
 /// <param name="templateResults"></param>
 /// <param name="consoleWriter"></param>
 /// <param name="errorWriter"></param>
-public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, ProjectConfig projectConfig, IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
-    : PackagerBase<RpmConfig>(sourceDir, outputDir, projectConfig, templateResults, consoleWriter, errorWriter)
+public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, DirectoryInfo workingDir, ShipyardConfig projectConfig,
+                         IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
+    : PackagerBase<RpmConfig>(sourceDir, outputDir, workingDir, projectConfig, templateResults, consoleWriter, errorWriter)
 {
     /// <inheritdoc/>
     protected override async Task<PackageResult> CreatePackageForFormatAsync(RpmConfig formatConfig, TemplateResult? buildTemplate = null)
@@ -46,16 +48,16 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
 
         ConsoleWriter.WriteLine($"Building RPM package for runtime {buildTemplate.Runtime}...");
 
-        if (!Directory.Exists(Path.Combine(OutputDir.ToString(), $"publish-{buildTemplate.Runtime}")))
+        if (!Directory.Exists(Path.Combine(WorkingDir.ToString(), $"publish-{buildTemplate.Runtime}")))
         {
             throw new DirectoryNotFoundException($"Published directory not found for runtime {buildTemplate.Runtime}");
         }
 
-        DirectoryInfo buildRoot = CreateRpmBuildRoot(OutputDir, buildTemplate.Runtime.ToJsonValue());
+        DirectoryInfo buildRoot = CreateRpmBuildRoot(WorkingDir, buildTemplate.Runtime.ToJsonValue());
 
         // Copy the publish files to BUILDROOT
         bool copied = CopyPublishedFilesToBuildRoot(
-            new DirectoryInfo(Path.Combine(OutputDir.ToString(), $"publish-{buildTemplate.Runtime}")),
+            new DirectoryInfo(Path.Combine(WorkingDir.ToString(), $"publish-{buildTemplate.Runtime}")),
             buildRoot,
             config.PackageName);
 
@@ -90,13 +92,17 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Proje
             throw new InvalidOperationException("RPM build failed.");
         }
 
-        return builtRpmPath;
+        string finalRpmPath = Path.Combine(OutputDir.FullName, Path.GetFileName(builtRpmPath));
+
+        File.Move(builtRpmPath, finalRpmPath);
+
+        return finalRpmPath;
     }
 
-    private static DirectoryInfo CreateRpmBuildRoot(DirectoryInfo outputDir, string runtime)
+    private static DirectoryInfo CreateRpmBuildRoot(DirectoryInfo workingDir, string runtime)
     {
         // Set up rpmbuild directory structure
-        DirectoryInfo rpmbuildRoot = outputDir.CreateSubdirectory(Path.Combine("rpmbuild", runtime));
+        DirectoryInfo rpmbuildRoot = workingDir.CreateSubdirectory(Path.Combine("rpmbuild", runtime));
 
         return rpmbuildRoot;
     }

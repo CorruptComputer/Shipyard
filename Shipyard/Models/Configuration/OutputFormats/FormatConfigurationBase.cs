@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using FluentValidation;
 
-namespace Shipyard.Models.ProjectConfiguration.FormatConfiguration;
+namespace Shipyard.Models.Configuration.OutputFormats;
 
 /// <summary>
 /// Base class for format-specific configurations.<br />
@@ -11,7 +12,4 @@ namespace Shipyard.Models.ProjectConfiguration.FormatConfiguration;
 //[JsonDerivedType(typeof(DebConfig), nameof(PackageFormat.Deb))]
 [JsonDerivedType(typeof(RpmConfig), nameof(PackageFormat.rpm))]
 //[JsonDerivedType(typeof(TarConfig), nameof(PackageFormat.Tarball))]
-public abstract record FormatConfigurationBase
-{
-    internal abstract bool Validate(TextWriter errorWriter);
-}
+public abstract record FormatConfigurationBase;

@@ -1,6 +1,6 @@
 using Shipyard.Models;
-using Shipyard.Models.ProjectConfiguration;
-using Shipyard.Models.ProjectConfiguration.FormatConfiguration;
+using Shipyard.Models.Configuration;
+using Shipyard.Models.Configuration.OutputFormats;
 using Shipyard.Templates;
 
 namespace Shipyard.Packagers;
@@ -10,11 +10,13 @@ namespace Shipyard.Packagers;
 /// </summary>
 /// <param name="sourceDir"></param>
 /// <param name="outputDir"></param>
+/// <param name="workingDir"></param>
 /// <param name="projectConfig"></param>
 /// <param name="templateResults"></param>
 /// <param name="consoleWriter"></param>
 /// <param name="errorWriter"></param>
-public abstract class PackagerBase(DirectoryInfo sourceDir, DirectoryInfo outputDir, ProjectConfig projectConfig, IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
+public abstract class PackagerBase(DirectoryInfo sourceDir, DirectoryInfo outputDir, DirectoryInfo workingDir, ShipyardConfig projectConfig,
+                                   IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
 {
     /// <summary>
     ///   The source directory containing the source code to be packaged.
@@ -27,9 +29,14 @@ public abstract class PackagerBase(DirectoryInfo sourceDir, DirectoryInfo output
     protected DirectoryInfo OutputDir { get; } = outputDir;
 
     /// <summary>
+    ///   The working directory for temporary files.
+    /// </summary>
+    protected DirectoryInfo WorkingDir { get; } = workingDir;
+
+    /// <summary>
     ///   The project configuration associated with this run.
     /// </summary>
-    protected ProjectConfig ProjectConfig { get; } = projectConfig;
+    protected ShipyardConfig ProjectConfig { get; } = projectConfig;
 
     /// <summary>
     ///   The built template results.
@@ -53,8 +60,9 @@ public abstract class PackagerBase(DirectoryInfo sourceDir, DirectoryInfo output
 }
 
 /// <inheritdoc />
-public abstract class PackagerBase<TFormatConfig>(DirectoryInfo sourceDir, DirectoryInfo outputDir, ProjectConfig projectConfig, IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
-    : PackagerBase(sourceDir, outputDir, projectConfig, templateResults, consoleWriter, errorWriter)
+public abstract class PackagerBase<TFormatConfig>(DirectoryInfo sourceDir, DirectoryInfo outputDir, DirectoryInfo workingDir, ShipyardConfig projectConfig,
+                                                  IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
+    : PackagerBase(sourceDir, outputDir, workingDir, projectConfig, templateResults, consoleWriter, errorWriter)
     where TFormatConfig : FormatConfigurationBase
 {
     /// <summary>

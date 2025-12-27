@@ -3,23 +3,18 @@ using System.Text.Json.Serialization;
 namespace Shipyard.Models;
 
 /// <summary>
-///   The supported package formats.
+///   The options for .NET publishing.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum PackageFormat
+public enum DotnetPublishOptions
 {
     /// <summary>
-    ///   The DEB format.
+    ///   Trim unused assemblies from the published application.
     /// </summary>
-    deb,
+    Trim,
 
     /// <summary>
-    ///   The RPM format.
+    ///   Publish as a self-contained application.
     /// </summary>
-    rpm,
-
-    /// <summary>
-    ///   .tar.gz format.
-    /// </summary>
-    tarball
+    SelfContained
 }

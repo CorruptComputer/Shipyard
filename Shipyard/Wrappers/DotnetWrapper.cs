@@ -12,16 +12,22 @@ public class DotnetWrapper(TextWriter consoleWriter, TextWriter errorWriter)
     /// </summary>
     /// <param name="projectFile">Path to the project file</param>
     /// <param name="outputDirectory">Directory to publish to</param>
+    /// <param name="configuration"></param>
     /// <param name="framework">Target framework (e.g., net9.0)</param>
     /// <param name="runtime">Runtime identifier (e.g., linux-x64)</param>
+    /// <param name="selfContained"></param>
+    /// <param name="trim"></param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Path to the published directory</returns>
     /// <exception cref="InvalidOperationException">Thrown when the publish process fails</exception>
     public async Task<string?> PublishAsync(
         string projectFile,
         string outputDirectory,
+        string configuration,
         string framework,
         string runtime,
+        bool selfContained = false,
+        bool trim = false,
         CancellationToken cancellationToken = default)
     {
         // Build the publish arguments
@@ -30,17 +36,27 @@ public class DotnetWrapper(TextWriter consoleWriter, TextWriter errorWriter)
             "publish",
             projectFile,
             "--output", outputDirectory,
-            "--configuration", "Release", // TODO: Figure out, does this need to be configurable?
+            "--configuration", configuration,
             "--framework", framework,
             "--runtime", runtime,
-            "--no-self-contained", // TODO: Figure out, does this need to be configurable?
-            "--verbosity", "minimal" // TODO: Figure out, does this need to be configurable?
         ];
 
-        ProcessStartInfo psi = new()
+        if (selfContained)
         {
-            FileName = "dotnet", // TODO: Figure out, does this need to be configurable to provide a full path?
-            Arguments = string.Join(" ", args.Select(arg => $"\"{arg}\"")),
+            args.Add("--self-contained");
+        }
+        else
+        {
+            args.Add("--no-self-contained");
+        }
+
+        if (trim)
+        {
+            args.Add("/p:PublishTrimmed=true");
+        }
+
+        ProcessStartInfo psi = new("dotnet", args)
+        {
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
