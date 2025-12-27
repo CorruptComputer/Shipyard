@@ -1,5 +1,10 @@
 {
   "$schema": "../shipyard.schema.json",
+  "executable": "shipyard",
+  "version": "0.0.4",
+  "author": "Nickolas Gupton",
+  "license": "MIT",
+  "repositoryUrl": "https://github.com/CorruptComputer/Shipyard",
   "dotnet": {
     "projectFile": "./Shipyard.csproj",
     "framework": "net10.0",
@@ -9,11 +14,7 @@
     ],
     "publish": []
   },
-  "version": "0.0.4",
-  "author": "Nickolas Gupton",
-  "license": "MIT",
-  "repositoryUrl": "https://github.com/CorruptComputer/Shipyard",
-  "formatConfigs": [
+  "formats": [
     {
       "format": "rpm",
       "packageName": "Shipyard",

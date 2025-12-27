@@ -4,12 +4,13 @@
   "description": "Schema for Shipyard project configuration files",
   "type": "object",
   "required": [
-    "dotnet",
+    "executable",
     "version",
     "author",
     "license",
     "repositoryUrl",
-    "formatConfigs"
+    "dotnet",
+    "formats"
   ],
   "additionalProperties": false,
   "properties": {
@@ -17,8 +18,9 @@
       "type": "string",
       "description": "The schema version"
     },
-    "dotnet": {
-      "$ref": "#/definitions/dotnetConfig"
+    "executable": {
+      "type": "string",
+      "description": "The name of the executable to be built"
     },
     "version": {
       "type": "string",
@@ -43,7 +45,10 @@
       "description": "The repository URL for the project source",
       "format": "uri"
     },
-    "formatConfigs": {
+    "dotnet": {
+      "$ref": "#/definitions/dotnetConfig"
+    },
+    "formats": {
       "type": "array",
       "description": "Format-specific configurations",
       "minItems": 1,

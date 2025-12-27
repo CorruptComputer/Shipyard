@@ -55,6 +55,7 @@ public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
 
         var templateModel = new
         {
+            executable_name = config.Executable,
             package_name = rpmConfig.PackageName,
             version = config.Version,
             release = rpmConfig.Release,

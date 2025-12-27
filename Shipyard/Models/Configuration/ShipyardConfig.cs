@@ -14,10 +14,10 @@ namespace Shipyard.Models.Configuration;
 public record ShipyardConfig
 {
     /// <summary>
-    ///   The .NET publishing configuration.
+    ///   The name of the executable to be built.
     /// </summary>
-    [JsonPropertyName("dotnet")]
-    public DotnetConfig? Dotnet { get; init; }
+    [JsonPropertyName("executable")]
+    public string? Executable { get; init; }
 
     /// <summary>
     ///   The version of the project.
@@ -44,31 +44,52 @@ public record ShipyardConfig
     public string? RepositoryUrl { get; init; }
 
     /// <summary>
+    ///   The .NET publishing configuration.
+    /// </summary>
+    [JsonPropertyName("dotnet")]
+    public DotnetConfig? Dotnet { get; init; }
+
+    /// <summary>
     ///   The format-specific configurations.
     /// </summary>
-    [JsonPropertyName("formatConfigs")]
+    [JsonPropertyName("formats")]
     public List<FormatConfigurationBase>? FormatConfigs { get; init; }
 
     // Quick validation to get rid of nullability warnings elsewhere
     // Should NOT be used for full validation of config correctness
-    [MemberNotNullWhen(true, nameof(Dotnet))]
+
+    [MemberNotNullWhen(true, nameof(Executable))]
     [MemberNotNullWhen(true, nameof(Version))]
     [MemberNotNullWhen(true, nameof(Author))]
     [MemberNotNullWhen(true, nameof(License))]
     [MemberNotNullWhen(true, nameof(RepositoryUrl))]
+    [MemberNotNullWhen(true, nameof(Dotnet))]
     [MemberNotNullWhen(true, nameof(FormatConfigs))]
     internal bool HasNonNullRequiredValues
-        => Dotnet is not null
+        => !string.IsNullOrWhiteSpace(Executable)
             && !string.IsNullOrWhiteSpace(Version)
             && !string.IsNullOrWhiteSpace(Author)
             && !string.IsNullOrWhiteSpace(License)
             && !string.IsNullOrWhiteSpace(RepositoryUrl)
+            && Dotnet is not null
             && FormatConfigs is not null;
 
     internal sealed class Validator : AbstractValidator<ShipyardConfig>
     {
         public Validator(DirectoryInfo configDirectory)
         {
+            RuleFor(config => config.Executable)
+                .NotEmpty().WithMessage("'executable' is required.");
+            RuleFor(config => config.Version)
+                .NotEmpty().WithMessage("'version' is required.");
+            RuleFor(config => config.Author)
+                .NotEmpty().WithMessage("'author' is required.");
+            RuleFor(config => config.License)
+                .NotEmpty().WithMessage("'license' is required.");
+            RuleFor(config => config.RepositoryUrl)
+                .NotEmpty().WithMessage("'repositoryUrl' is required.")
+                .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("RepositoryUrl must be a valid absolute URI.");
+
             RuleFor(config => config.Dotnet)
                 .NotNull().WithMessage("'dotnet' section of configuration is missing.")
                 .Custom((dc, ctx) =>
@@ -89,17 +110,8 @@ public record ShipyardConfig
             RuleFor(config => config.Dotnet!)
                 .SetValidator(new DotnetConfig.Validator(configDirectory)).When(c => c is not null);
 
-            RuleFor(config => config.Version)
-                .NotEmpty().WithMessage("'version' is required.");
-            RuleFor(config => config.Author)
-                .NotEmpty().WithMessage("'author' is required.");
-            RuleFor(config => config.License)
-                .NotEmpty().WithMessage("'license' is required.");
-            RuleFor(config => config.RepositoryUrl)
-                .NotEmpty().WithMessage("'repositoryUrl' is required.")
-                .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("RepositoryUrl must be a valid absolute URI.");
             RuleFor(config => config.FormatConfigs)
-                .NotEmpty().WithMessage("'formatConfigs' must contain at least one format configuration.")
+                .NotEmpty().WithMessage("'formats' must contain at least one format configuration.")
                 .Custom((fc, ctx) =>
                 {
                     if (fc is null)
@@ -122,7 +134,18 @@ public record ShipyardConfig
                         }
 
                     }
-                });
+                })
+                .Must(fc =>
+                {
+                    if (fc is null)
+                    {
+                        return true;
+                    }
+
+                    List<Type> types = [.. fc.Select(f => f.GetType())];
+
+                    return types.Distinct().Count() == types.Count;
+                }).WithMessage("'formats' contains duplicate format.");
         }
     }
 

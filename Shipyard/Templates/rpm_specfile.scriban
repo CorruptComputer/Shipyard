@@ -78,7 +78,7 @@ Provides: {{ prov }}
 cp -r %{_topdir}/SOURCE/* %{buildroot}/usr/share/{{ package_name }}/
 
 # Create symlink in /usr/local/bin/{{ package_name }} pointing to the actual binary
-ln -s ../../share/{{ package_name }}/{{ package_name }} %{buildroot}/usr/local/bin/{{ package_name }}
+ln -s ../../share/{{ package_name }}/{{ executable_name }} %{buildroot}/usr/local/bin/{{ executable_name }}
 
 {{ if systemd_service_name }}
 # Install the systemd service file
@@ -109,14 +109,11 @@ ln -s ../../share/{{ package_name }}/{{ package_name }} %{buildroot}/usr/local/b
 {{ end }}
 
 %files
-/usr/local/bin/{{ package_name }}
+/usr/local/bin/{{ executable_name }}
 /usr/share/{{ package_name }}/
 {{ if systemd_service_name }}
 /etc/systemd/system/{{ systemd_service_name }}
 {{ end }}
-
-{{# Include all files from the build #}}
-/*
 
 {{ if changelog_date }}
 
