@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Packages
         run: |
-          shipyard --config ./Shipyard/shipyard.json --output ./publish/
+          dotnet run --project ./Shipyard/Shipyard.csproj -- --config ./Shipyard/shipyard.json --output ./publish/
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v6
