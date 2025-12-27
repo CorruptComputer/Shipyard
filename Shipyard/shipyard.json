@@ -23,7 +23,21 @@
       "dependsOn": [
         "dotnet-runtime-10.0",
         "dotnet-sdk-10.0",
-        "rpm-build"
+        "rpm-build",
+        "dpkg"
+      ]
+    },
+    {
+      "format": "deb",
+      "packageName": "Shipyard",
+      "section": "utils",
+      "priority": "optional",
+      "maintainer": "Nickolas Gupton <nickolas@gupton.xyz>",
+      "depends": [
+        "dotnet-runtime-10.0",
+        "dotnet-sdk-10.0",
+        "rpm",
+        "dpkg"
       ]
     }
   ]

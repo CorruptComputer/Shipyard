@@ -26,6 +26,18 @@
       "installSystemdService": true,
       "systemdServiceName": "Shipyard.Demo.service",
       "postInstallScript": "/usr/local/bin/Shipyard.Demo"
+    },
+    {
+      "format": "deb",
+      "packageName": "Shipyard.Demo",
+      "section": "utils",
+      "priority": "optional",
+      "maintainer": "Nickolas Gupton <nickolas@gupton.xyz>",
+      "depends": [
+        "dotnet-runtime-10.0"
+      ],
+      "installSystemdService": true,
+      "systemdServiceName": "Shipyard.Demo.service"
     }
   ]
 }

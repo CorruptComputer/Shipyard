@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using FluentValidation;
 
 namespace Shipyard.Models.Configuration.OutputFormats;
 
@@ -9,7 +8,7 @@ namespace Shipyard.Models.Configuration.OutputFormats;
 /// </summary>
 [JsonSerializable(typeof(FormatConfigurationBase), TypeInfoPropertyName = "format")]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "format")]
-//[JsonDerivedType(typeof(DebConfig), nameof(PackageFormat.Deb))]
+[JsonDerivedType(typeof(DebConfig), nameof(PackageFormat.deb))]
 [JsonDerivedType(typeof(RpmConfig), nameof(PackageFormat.rpm))]
 //[JsonDerivedType(typeof(TarConfig), nameof(PackageFormat.Tarball))]
 public abstract record FormatConfigurationBase;

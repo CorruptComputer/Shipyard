@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -16,61 +15,61 @@ public record RpmConfig : FormatConfigurationBase
     ///   The name of the package.
     /// </summary>
     [JsonPropertyName("packageName")]
-    public string? PackageName { get; set; }
+    public string? PackageName { get; init; }
 
     /// <summary>
     ///   The release number (incremented for rebuilds of the same version).
     /// </summary>
     [JsonPropertyName("release")]
-    public int? Release { get; set; }
+    public int? Release { get; init; }
 
     /// <summary>
     ///   Optionally, the dependencies which this package provides.
     /// </summary>
     [JsonPropertyName("provides")]
-    public List<string>? Provides { get; set; }
+    public List<string>? Provides { get; init; }
 
     /// <summary>
     ///   Optionally, the dependencies which this package requires.
     /// </summary>
     [JsonPropertyName("dependsOn")]
-    public List<string>? DependsOn { get; set; }
+    public List<string>? DependsOn { get; init; }
 
     /// <summary>
     ///   Optionally, a flag indicating whether to install a systemd service unit.
     /// </summary>
     [JsonPropertyName("installSystemdService")]
-    public bool? InstallSystemdService { get; set; }
+    public bool? InstallSystemdService { get; init; }
 
     /// <summary>
     ///   Optionally, the name of the systemd service.
     /// </summary>
     [JsonPropertyName("systemdServiceName")]
-    public string? SystemdServiceName { get; set; }
+    public string? SystemdServiceName { get; init; }
 
     /// <summary>
     ///   Optionally, a script to run before installation.
     /// </summary>
     [JsonPropertyName("preInstallScript")]
-    public string? PreInstallScript { get; set; }
+    public string? PreInstallScript { get; init; }
 
     /// <summary>
     ///   Optionally, a script to run after installation.
     /// </summary>
     [JsonPropertyName("postInstallScript")]
-    public string? PostInstallScript { get; set; }
+    public string? PostInstallScript { get; init; }
 
     /// <summary>
     ///   Optionally, a script to run before uninstallation.
     /// </summary>
     [JsonPropertyName("preUninstallScript")]
-    public string? PreUninstallScript { get; set; }
+    public string? PreUninstallScript { get; init; }
 
     /// <summary>
     ///   Optionally, a script to run after uninstallation.
     /// </summary>
     [JsonPropertyName("postUninstallScript")]
-    public string? PostUninstallScript { get; set; }
+    public string? PostUninstallScript { get; init; }
 
     // Quick validation to get rid of nullability warnings elsewhere
     // Should NOT be used for full validation of config correctness

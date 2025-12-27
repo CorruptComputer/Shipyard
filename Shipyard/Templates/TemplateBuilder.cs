@@ -37,6 +37,9 @@ public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
                     case RpmConfig rpmConfig:
                         results.Add(await BuildRpmTemplateAsync(runtime, rpmConfig));
                         break;
+                    case DebConfig debConfig:
+                        results.Add(await BuildDebTemplateAsync(runtime, debConfig));
+                        break;
                     default:
                         throw new NotSupportedException($"Unsupported format configuration type: {config.GetType().Name}");
                 }
@@ -51,6 +54,22 @@ public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
         if (!config.HasNonNullRequiredValues || !config.Dotnet.HasNonNullRequiredValues)
         {
             throw new InvalidOperationException("Project configuration is missing required values.");
+        }
+
+        string templatePath = Path.Combine(
+            Path.GetDirectoryName(typeof(TemplateBuilder).Assembly.Location) ?? ".",
+            "Templates/rpm_specfile.scriban");
+
+        string templateContent = File.ReadAllText(templatePath);
+        Template template = Template.Parse(templateContent);
+        if (template.HasErrors)
+        {
+            foreach (LogMessage message in template.Messages)
+            {
+                Console.Error.WriteLine($"Template parsing error: {message.Message}");
+            }
+
+            throw new InvalidOperationException($"Error parsing template: {string.Join(", ", template.Messages.Select(m => m.Message))}");
         }
 
         var templateModel = new
@@ -76,9 +95,23 @@ public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
             post_uninstall_script = rpmConfig.PostUninstallScript
         };
 
+        string result = await template.RenderAsync(templateModel);
+        string outputFilePath = Path.Combine(outputDir.FullName, $"{rpmConfig.PackageName}-{runtime.ToRpmArchString()}.spec");
+
+        await File.WriteAllTextAsync(outputFilePath, result);
+        return new TemplateResult(PackageFormat.rpm, runtime, new FileInfo(outputFilePath));
+    }
+
+    private async Task<TemplateResult> BuildDebTemplateAsync(DotnetRuntimes runtime, DebConfig debConfig)
+    {
+        if (!config.HasNonNullRequiredValues || !config.Dotnet.HasNonNullRequiredValues)
+        {
+            throw new InvalidOperationException("Project configuration is missing required values.");
+        }
+
         string templatePath = Path.Combine(
             Path.GetDirectoryName(typeof(TemplateBuilder).Assembly.Location) ?? ".",
-            "Templates/rpm_specfile.scriban");
+            "Templates/deb_controlfile.scriban");
 
         string templateContent = File.ReadAllText(templatePath);
         Template template = Template.Parse(templateContent);
@@ -91,10 +124,23 @@ public class TemplateBuilder(ShipyardConfig config, DirectoryInfo outputDir)
 
             throw new InvalidOperationException($"Error parsing template: {string.Join(", ", template.Messages.Select(m => m.Message))}");
         }
+
+        var templateModel = new
+        {
+            package_name = debConfig.PackageName,
+            version = config.Version,
+            section = debConfig.Section,
+            priority = debConfig.Priority,
+            architecture = runtime.ToDebArchString(),
+            maintainer = debConfig.Maintainer,
+            depends = string.Join(", ", debConfig.Depends ?? []),
+            description = "TODO: Add description"
+        };
+
         string result = await template.RenderAsync(templateModel);
-        string outputFilePath = Path.Combine(outputDir.FullName, $"{rpmConfig.PackageName}-{runtime.ToRpmArchString()}.spec");
+        string outputFilePath = Path.Combine(outputDir.FullName, $"{debConfig.PackageName}-{runtime.ToDebArchString()}.control");
 
         await File.WriteAllTextAsync(outputFilePath, result);
-        return new TemplateResult(PackageFormat.rpm, runtime, new FileInfo(outputFilePath));
+        return new TemplateResult(PackageFormat.deb, runtime, new FileInfo(outputFilePath));
     }
 }

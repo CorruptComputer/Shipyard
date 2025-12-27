@@ -134,6 +134,15 @@ public sealed class ShipyardAction : AsynchronousCommandLineAction
             );
         }
 
+        if (config.FormatConfigs?.OfType<DebConfig>().Any() == true)
+        {
+            packagersNeeded.Add(
+                new DebPackager(projectDir, output, workingDir, config,
+                    templateResults.Where(tr => tr.Format == PackageFormat.deb),
+                    consoleWriter, errorWriter)
+            );
+        }
+
         if (packagersNeeded.Count == 0)
         {
             await errorWriter.WriteLineAsync($"No supported package formats found in configuration.");

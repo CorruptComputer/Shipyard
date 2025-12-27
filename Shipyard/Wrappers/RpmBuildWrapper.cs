@@ -15,7 +15,7 @@ public class RpmBuildWrapper(TextWriter consoleWriter, TextWriter errorWriter)
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Path to the built RPM file if successful; null otherwise</returns>
     /// <exception cref="InvalidOperationException">Thrown when the rpmbuild process fails to start</exception>
-    public async Task<string?> BuildRpmAsync(
+    public async Task<string?> BuildAsync(
         FileInfo specFile,
         DirectoryInfo buildRoot,
         CancellationToken cancellationToken = default)
@@ -35,10 +35,8 @@ public class RpmBuildWrapper(TextWriter consoleWriter, TextWriter errorWriter)
             specFile.FullName
         ];
 
-        ProcessStartInfo psi = new()
+        ProcessStartInfo psi = new("rpmbuild", args)
         {
-            FileName = "rpmbuild",
-            Arguments = string.Join(" ", args.Select(arg => $"\"{arg}\"")),
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

@@ -12,7 +12,7 @@ runs:
     - name: Install packaging tools
       shell: bash
       run: |
-        sudo apt-get install -y rpm
+        sudo apt-get install -y rpm dpkg
         dotnet tool install --global shipyard
 
     - name: Print .NET version and SDKs

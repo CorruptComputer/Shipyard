@@ -55,6 +55,9 @@
       "items": {
         "oneOf": [
           {
+            "$ref": "#/definitions/debConfig"
+          },
+          {
             "$ref": "#/definitions/rpmConfig"
           }
         ]
@@ -62,6 +65,61 @@
     }
   },
   "definitions": {
+    "debConfig": {
+      "type": "object",
+      "title": "DEB Configuration",
+      "description": "Configuration specific to DEB (Debian/Ubuntu) package format",
+      "required": [
+        "format",
+        "packageName",
+        "section",
+        "priority",
+        "maintainer"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "deb",
+          "description": "Format type identifier"
+        },
+        "packageName": {
+          "type": "string",
+          "description": "The name of the package"
+        },
+        "section": {
+          "type": "string",
+          "description": "The section of the package (e.g., 'utils', 'net', 'admin')"
+        },
+        "priority": {
+          "type": "string",
+          "description": "The priority of the package (e.g., 'optional', 'standard', 'required')"
+        },
+        "maintainer": {
+          "type": "string",
+          "description": "The maintainer of the package, must be in the format 'Name <email>'"
+        },
+        "depends": {
+          "type": "array",
+          "description": "Optionally, the dependencies which this package requires",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            "dotnet-runtime-10.0",
+            "foo"
+          ]
+        },
+        "installSystemdService": {
+          "type": "boolean",
+          "description": "Optionally, a flag indicating whether to install a systemd service unit"
+        },
+        "systemdServiceName": {
+          "type": "string",
+          "description": "Optionally, the name of the systemd service"
+        }
+      }
+    },
     "dotnetConfig": {
       "type": "object",
       "title": "DotNet Configuration",

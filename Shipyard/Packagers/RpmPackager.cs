@@ -20,7 +20,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Direc
                          IEnumerable<TemplateResult> templateResults, TextWriter consoleWriter, TextWriter errorWriter)
     : PackagerBase<RpmConfig>(sourceDir, outputDir, workingDir, projectConfig, templateResults, consoleWriter, errorWriter)
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     protected override async Task<PackageResult> CreatePackageForFormatAsync(RpmConfig formatConfig, TemplateResult? buildTemplate = null)
     {
         ArgumentNullException.ThrowIfNull(buildTemplate);
@@ -83,7 +83,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Direc
         }
 
         RpmBuildWrapper rpmBuilder = new(ConsoleWriter, ErrorWriter);
-        string? builtRpmPath = await rpmBuilder.BuildRpmAsync(
+        string? builtRpmPath = await rpmBuilder.BuildAsync(
             buildTemplate.OutputFile,
             buildRoot);
 
