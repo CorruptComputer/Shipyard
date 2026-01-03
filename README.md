@@ -73,5 +73,3 @@ Once this is created and shipyard is installed, you should be able to just run `
 
 Since this is still very early in this project, I will probably not accept any contributions.
 Once things have stabilized and I'm able to achieve what I want from this, contributions will be more than welcome.
-
-##
