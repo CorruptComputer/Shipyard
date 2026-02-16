@@ -61,6 +61,9 @@ Provides: {{ prov }}
 %description
 {{ description }}
 
+# Don't generate build_id links to prevent conflicts when building multiple executables from the same source
+%define _build_id_links none
+
 %prep
 # noop
 

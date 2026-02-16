@@ -26,6 +26,4 @@ public static class Program
 
         return await rootCommand.Parse(args).InvokeAsync();
     }
-
-
 }

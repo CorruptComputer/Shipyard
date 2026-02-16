@@ -116,7 +116,7 @@ public class DebPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Direc
 
         string finalDebPath = Path.Combine(OutputDir.FullName, Path.GetFileName(builtDebPath));
 
-        File.Move(builtDebPath, finalDebPath);
+        File.Move(builtDebPath, finalDebPath, overwrite: true);
 
         return finalDebPath;
     }

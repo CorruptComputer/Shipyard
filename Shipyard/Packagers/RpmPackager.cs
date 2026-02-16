@@ -94,7 +94,7 @@ public class RpmPackager(DirectoryInfo sourceDir, DirectoryInfo outputDir, Direc
 
         string finalRpmPath = Path.Combine(OutputDir.FullName, Path.GetFileName(builtRpmPath));
 
-        File.Move(builtRpmPath, finalRpmPath);
+        File.Move(builtRpmPath, finalRpmPath, overwrite: true);
 
         return finalRpmPath;
     }

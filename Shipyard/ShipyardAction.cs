@@ -16,28 +16,38 @@ namespace Shipyard;
 /// </summary>
 public sealed class ShipyardAction : AsynchronousCommandLineAction
 {
+    private const string ConfigOptionName = "--config";
+    private const string OutputOptionName = "--output";
+    private const string CleanOptionName = "--clean";
     /// <summary>
     ///   The command arguments.
     /// </summary>
     public static readonly IReadOnlyList<Option> Options =
     [
-        new Option<FileInfo>("--config", "-c")
+        new Option<FileInfo>(ConfigOptionName)
         {
             Description = "Path to shipyard.json config file",
             Required = true
         },
-        new Option<DirectoryInfo>("--output", "-o")
+        new Option<DirectoryInfo>(OutputOptionName)
         {
             Description = "Path to the output directory for generated packages",
             Required = true
+        },
+        new Option<bool>(CleanOptionName)
+        {
+            Description = "Clean the output directory before building, if it already exists",
+            DefaultValueFactory = (_) => false
         },
     ];
 
     /// <inheritdoc/>
     public override async Task<int> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken = default)
     {
-        FileInfo configFile = parseResult.GetRequiredValue<FileInfo>("--config");
-        DirectoryInfo output = parseResult.GetRequiredValue<DirectoryInfo>("--output");
+        FileInfo configFile = parseResult.GetRequiredValue<FileInfo>(ConfigOptionName);
+        DirectoryInfo output = parseResult.GetRequiredValue<DirectoryInfo>(OutputOptionName);
+        bool clean = parseResult.GetValue<bool>(CleanOptionName);
+
         DirectoryInfo workingDir = new($"/tmp/shipyard/run-{Environment.ProcessId}");
 
         if (!workingDir.Exists)
@@ -75,23 +85,12 @@ public sealed class ShipyardAction : AsynchronousCommandLineAction
         else
         {
             consoleWriter.WriteLine($"Output directory '{output.FullName}' already exists.");
-            if (output.GetFileSystemInfos().Length > 0)
-            {
-                consoleWriter.WriteLine("Output directory is not empty, would you like to clean it before building? (y/n): ");
-                string? response = Console.ReadLine();
-                if (response is not null && response.Trim().ToLowerInvariant() is "y" or "yes")
-                {
-                    consoleWriter.WriteLine("Cleaning output directory...");
-                    output.Delete(true);
-                    output.Create();
 
-                }
-                else
-                {
-                    consoleWriter.WriteLine("Cannot continue with non-empty output directory, cancelling build.");
-                    workingDir.Delete(true);
-                    return 1;
-                }
+            if (clean)
+            {
+                consoleWriter.WriteLine($"Cleaning output directory...");
+                output.Delete(true);
+                output.Create();
             }
         }
 
