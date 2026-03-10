@@ -33,8 +33,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="Scriban" Version="6.5.4" />
-    <PackageReference Include="System.CommandLine" Version="2.0.3" />
+    <PackageReference Include="Scriban" Version="6.5.5" />
+    <PackageReference Include="System.CommandLine" Version="2.0.4" />
   </ItemGroup>
 
   <ItemGroup>
